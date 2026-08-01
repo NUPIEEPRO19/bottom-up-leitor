@@ -151,10 +151,51 @@
 
     function leituraRealizada(token) {
 
+  resultado.textContent =
+    "Consultando participante...";
+
+  fetch("https://script.google.com/macros/s/AKfycbweKHfR198LnCnQ_JIZjuibYKk-91e7ypIjtRRimvinjL9S7H8D_5mrnFXxSEsiP4IaDQ/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      token: token
+    })
+  })
+
+  .then(function(resposta) {
+    return resposta.json();
+  })
+
+  .then(function(dados) {
+
+    if (dados.sucesso) {
+
       resultado.textContent =
-        "QR Code identificado! Token: " + token;
+        "✅ " + dados.mensagem +
+        "\n\nParticipante: " +
+        dados.participante.nome;
+
+    } else {
+
+      resultado.textContent =
+        "⚠️ " + dados.mensagem;
 
     }
+
+  })
+
+  .catch(function(erro) {
+
+    console.error(erro);
+
+    resultado.textContent =
+      "❌ Não foi possível comunicar com o sistema de credenciamento.";
+
+  });
+
+}
 
 
     function erroDeLeitura() {
