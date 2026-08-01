@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Leitor QR Code - Bottom Up 7.0</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+
+      font-family: Arial, sans-serif;
+
+      background: #f4f6f8;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+
+      background: white;
+
+      padding: 25px;
+
+      border-radius: 18px;
+
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.08);
+
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+
+      color: #1f2937;
+    }
+
+    p {
+      color: #6b7280;
+    }
+
+    #reader {
+      width: 100%;
+
+      margin-top: 20px;
+
+      overflow: hidden;
+
+      border-radius: 12px;
+    }
+
+    #resultado {
+      margin-top: 20px;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      background: #f3f4f6;
+
+      color: #374151;
+
+      font-weight: bold;
+
+      word-break: break-word;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <main class="container">
+
+    <h1>Bottom Up 7.0</h1>
+
+    <p>
+      Leitor de QR Code
+    </p>
+
+    <div id="reader"></div>
+
+    <div id="resultado">
+      Aguardando leitura do QR Code...
+    </div>
+
+  </main>
+
+
+  <script>
+
+    function sucesso(token) {
+
+      document.getElementById("resultado").textContent =
+        "Token identificado: " + token;
+
+    }
+
+
+    function erroLeitura(mensagem) {
+
+      // Ignoramos os erros normais enquanto
+      // a câmera procura um QR Code.
+
+    }
+
+
+    const leitor = new Html5Qrcode("reader");
+
+
+    leitor.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      {
+        fps: 10,
+
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+
+      sucesso,
+
+      erroLeitura
+
+    )
+
+    .catch(function(erro) {
+
+      document.getElementById("resultado").textContent =
+        "Não foi possível acessar a câmera.";
+
+      console.error(erro);
+
+    });
+
+  </script>
+
+</body>
+
+</html>
