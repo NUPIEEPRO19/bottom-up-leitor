@@ -9,7 +9,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Leitor QR Code - Bottom Up 7.0</title>
+  <title>Bottom Up 7.0 - Leitor</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -22,10 +22,12 @@
     body {
       margin: 0;
       min-height: 100vh;
+
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+
+      padding: 16px;
 
       font-family: Arial, sans-serif;
 
@@ -34,11 +36,11 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 560px;
 
       background: white;
 
-      padding: 25px;
+      padding: 24px;
 
       border-radius: 18px;
 
@@ -49,29 +51,41 @@
     }
 
     h1 {
-      margin-top: 0;
+      margin: 0;
+
+      font-size: 26px;
 
       color: #1f2937;
     }
 
-    p {
+    .subtitulo {
+      margin-top: 8px;
+      margin-bottom: 22px;
+
       color: #6b7280;
+
+      font-size: 15px;
     }
 
     #reader {
       width: 100%;
 
-      margin-top: 20px;
-
       overflow: hidden;
 
-      border-radius: 12px;
+      border-radius: 14px;
+
+      background: #111827;
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: auto !important;
     }
 
     #resultado {
       margin-top: 20px;
 
-      padding: 15px;
+      padding: 16px;
 
       border-radius: 10px;
 
@@ -81,12 +95,25 @@
 
       font-weight: bold;
 
+      line-height: 1.4;
+
       word-break: break-word;
+    }
+
+    .instrucoes {
+      margin-top: 18px;
+
+      color: #6b7280;
+
+      font-size: 13px;
+
+      line-height: 1.5;
     }
 
   </style>
 
 </head>
+
 
 <body>
 
@@ -94,14 +121,21 @@
 
     <h1>Bottom Up 7.0</h1>
 
-    <p>
-      Leitor de QR Code
-    </p>
+    <div class="subtitulo">
+      Sistema de Credenciamento
+    </div>
+
 
     <div id="reader"></div>
 
+
     <div id="resultado">
-      Aguardando leitura do QR Code...
+      Aponte a câmera para o QR Code.
+    </div>
+
+
+    <div class="instrucoes">
+      Mantenha o QR Code visível e evite reflexos na tela.
     </div>
 
   </main>
@@ -109,52 +143,69 @@
 
   <script>
 
-    function sucesso(token) {
-
-      document.getElementById("resultado").textContent =
-        "Token identificado: " + token;
-
-    }
+    const resultado =
+      document.getElementById("resultado");
 
 
-    function erroLeitura(mensagem) {
+    function leituraRealizada(token) {
 
-      // Ignoramos os erros normais enquanto
-      // a câmera procura um QR Code.
+      resultado.textContent =
+        "QR Code identificado! Token: " + token;
 
     }
 
 
-    const leitor = new Html5Qrcode("reader");
+    function erroDeLeitura() {
+
+      // Ignora erros momentâneos enquanto
+      // o scanner procura um QR Code.
+
+    }
 
 
-    leitor.start(
+    const scanner =
+      new Html5Qrcode("reader");
+
+
+    scanner.start(
 
       {
         facingMode: "environment"
       },
 
       {
-        fps: 10,
+        fps: 15,
 
-        qrbox: {
-          width: 250,
-          height: 250
-        }
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+
+          const tamanho =
+            Math.floor(
+              Math.min(viewfinderWidth, viewfinderHeight) * 0.75
+            );
+
+          return {
+            width: tamanho,
+            height: tamanho
+          };
+
+        },
+
+        aspectRatio: 1.0
+
       },
 
-      sucesso,
+      leituraRealizada,
 
-      erroLeitura
+      erroDeLeitura
 
     )
 
     .catch(function(erro) {
 
-      document.getElementById("resultado").textContent =
-        "Não foi possível acessar a câmera.";
-
       console.error(erro);
+
+      resultado.textContent =
+        "Não foi possível acessar a câmera.";
 
     });
 
