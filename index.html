@@ -9,7 +9,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Bottom Up 7.0 - Leitor</title>
+  <title>Bottom Up 7.0 - Credenciamento</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -46,8 +46,11 @@
 
       box-shadow:
         0 8px 30px rgba(0, 0, 0, 0.08);
+    }
 
+    .cabecalho {
       text-align: center;
+      margin-bottom: 22px;
     }
 
     h1 {
@@ -60,11 +63,61 @@
 
     .subtitulo {
       margin-top: 8px;
-      margin-bottom: 22px;
 
       color: #6b7280;
 
       font-size: 15px;
+    }
+
+    .grupo {
+      margin-bottom: 18px;
+    }
+
+    .grupo-titulo {
+      margin-bottom: 8px;
+
+      font-size: 15px;
+
+      font-weight: bold;
+
+      color: #374151;
+    }
+
+    .opcoes {
+      display: flex;
+      gap: 10px;
+    }
+
+    .opcao {
+      flex: 1;
+
+      padding: 13px 10px;
+
+      border: 1px solid #d1d5db;
+
+      border-radius: 9px;
+
+      background: white;
+
+      color: #374151;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+    }
+
+    .opcao:hover {
+      background: #f3f4f6;
+    }
+
+    .opcao.ativo {
+      background: #1f2937;
+
+      color: white;
+
+      border-color: #1f2937;
     }
 
     #reader {
@@ -75,13 +128,22 @@
       border-radius: 14px;
 
       background: #111827;
+
+      min-height: 280px;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
     }
 
     #reader video {
       width: 100% !important;
-      
+
       height: auto !important;
-      
+
+      border-radius: 14px;
     }
 
     #resultado {
@@ -99,17 +161,169 @@
 
       line-height: 1.4;
 
+      white-space: pre-line;
+
       word-break: break-word;
+
+      text-align: center;
+    }
+
+    #resultado.sucesso {
+      background: #dcfce7;
+
+      color: #166534;
+    }
+
+    #resultado.erro {
+      background: #fee2e2;
+
+      color: #991b1b;
+    }
+
+    #resultado.aviso {
+      background: #fef3c7;
+
+      color: #92400e;
+    }
+
+    .participante {
+      display: none;
+
+      margin-top: 15px;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      background: #f9fafb;
+
+      color: #374151;
+
+      text-align: left;
+    }
+
+    .participante p {
+      margin: 6px 0;
+    }
+
+    .manual {
+      margin-top: 22px;
+
+      padding-top: 20px;
+
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .manual h3 {
+      margin: 0 0 8px;
+
+      font-size: 16px;
+
+      color: #374151;
+    }
+
+    .manual p {
+      margin: 0 0 12px;
+
+      color: #6b7280;
+
+      font-size: 13px;
+    }
+
+    .manual-linha {
+      display: flex;
+
+      gap: 8px;
+    }
+
+    .manual input {
+      flex: 1;
+
+      min-width: 0;
+
+      padding: 12px;
+
+      border: 1px solid #d1d5db;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+      outline: none;
+    }
+
+    .manual input:focus {
+      border-color: #6b7280;
+    }
+
+    .manual button {
+      padding: 12px 16px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background: #1f2937;
+
+      color: white;
+
+      cursor: pointer;
+
+      font-weight: bold;
+    }
+
+    .manual button:hover {
+      background: #111827;
     }
 
     .instrucoes {
-      margin-top: 18px;
+      margin-top: 16px;
 
       color: #6b7280;
 
       font-size: 13px;
 
       line-height: 1.5;
+
+      text-align: center;
+    }
+
+    .rodape {
+      margin-top: 20px;
+
+      text-align: center;
+
+      font-size: 12px;
+
+      color: #9ca3af;
+    }
+
+    @media (max-width: 480px) {
+
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .opcoes {
+        gap: 7px;
+      }
+
+      .opcao {
+        padding: 12px 6px;
+      }
+
+      .manual-linha {
+        flex-direction: column;
+      }
+
+      .manual button {
+        width: 100%;
+      }
+
     }
 
   </style>
@@ -121,87 +335,423 @@
 
   <main class="container">
 
-    <h1>Bottom Up 7.0</h1>
+    <header class="cabecalho">
 
-    <div class="subtitulo">
-      Sistema de Credenciamento
-    </div>
+      <h1>Bottom Up 7.0</h1>
 
+      <div class="subtitulo">
+        Sistema de Credenciamento
+      </div>
+
+    </header>
+
+
+    <!-- DIA DO EVENTO -->
+
+    <section class="grupo">
+
+      <div class="grupo-titulo">
+        Dia do evento
+      </div>
+
+      <div class="opcoes">
+
+        <button
+          type="button"
+          class="opcao ativo"
+          id="dia1"
+          onclick="selecionarDia('Dia 1')"
+        >
+          Dia 1
+        </button>
+
+        <button
+          type="button"
+          class="opcao"
+          id="dia2"
+          onclick="selecionarDia('Dia 2')"
+        >
+          Dia 2
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- TIPO DE REGISTRO -->
+
+    <section class="grupo">
+
+      <div class="grupo-titulo">
+        Tipo de registro
+      </div>
+
+      <div class="opcoes">
+
+        <button
+          type="button"
+          class="opcao ativo"
+          id="entrada"
+          onclick="selecionarTipo('Entrada')"
+        >
+          Entrada
+        </button>
+
+        <button
+          type="button"
+          class="opcao"
+          id="saida"
+          onclick="selecionarTipo('Saída')"
+        >
+          Saída
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- CÂMERA -->
 
     <div id="reader"></div>
 
 
+    <!-- RESULTADO -->
+
     <div id="resultado">
-      Aponte a câmera para o QR Code.
+      Aguardando leitura do QR Code...
     </div>
+
+
+    <!-- PARTICIPANTE -->
+
+    <section
+      id="participante"
+      class="participante"
+    >
+
+      <p>
+        <strong>Nome:</strong>
+        <span id="nomeParticipante"></span>
+      </p>
+
+      <p>
+        <strong>ID:</strong>
+        <span id="idParticipante"></span>
+      </p>
+
+    </section>
+
+
+    <!-- CREDENCIAMENTO MANUAL -->
+
+    <section class="manual">
+
+      <h3>
+        Credenciamento manual
+      </h3>
+
+      <p>
+        Caso seja necessário, digite o token do participante.
+      </p>
+
+      <div class="manual-linha">
+
+        <input
+          type="text"
+          id="tokenManual"
+          placeholder="Digite o token"
+          autocomplete="off"
+        >
+
+        <button
+          type="button"
+          onclick="credenciarManual()"
+        >
+          Credenciar
+        </button>
+
+      </div>
+
+    </section>
 
 
     <div class="instrucoes">
       Mantenha o QR Code visível e evite reflexos na tela.
     </div>
 
+
+    <footer class="rodape">
+      Bottom Up 7.0
+    </footer>
+
   </main>
 
 
   <script>
 
+    const URL_APPS_SCRIPT =
+      "https://script.google.com/macros/s/AKfycbweKHfR198LnCnQ_JIZjuibYKk-91e7ypIjtRRimvinjL9S7H8D_5mrnFXxSEsiP4IaDQ/exec";
+
+
+    let diaSelecionado = "Dia 1";
+
+    let tipoSelecionado = "Entrada";
+
+    let processando = false;
+
+
     const resultado =
       document.getElementById("resultado");
+
+    const participante =
+      document.getElementById("participante");
+
+    const nomeParticipante =
+      document.getElementById("nomeParticipante");
+
+    const idParticipante =
+      document.getElementById("idParticipante");
+
+    const tokenManual =
+      document.getElementById("tokenManual");
+
+
+    function selecionarDia(dia) {
+
+      diaSelecionado = dia;
+
+      document
+        .getElementById("dia1")
+        .classList
+        .toggle("ativo", dia === "Dia 1");
+
+      document
+        .getElementById("dia2")
+        .classList
+        .toggle("ativo", dia === "Dia 2");
+
+      atualizarStatus(
+        dia + " selecionado. " +
+        tipoSelecionado +
+        " aguardando leitura."
+      );
+
+    }
+
+
+    function selecionarTipo(tipo) {
+
+      tipoSelecionado = tipo;
+
+      document
+        .getElementById("entrada")
+        .classList
+        .toggle("ativo", tipo === "Entrada");
+
+      document
+        .getElementById("saida")
+        .classList
+        .toggle("ativo", tipo === "Saída");
+
+      atualizarStatus(
+        diaSelecionado + " - " +
+        tipo +
+        " aguardando leitura."
+      );
+
+    }
+
+
+    function atualizarStatus(
+      mensagem,
+      tipo = ""
+    ) {
+
+      resultado.textContent = mensagem;
+
+      resultado.className = "";
+
+      resultado.id = "resultado";
+
+      if (tipo) {
+        resultado.classList.add(tipo);
+      }
+
+    }
+
+
+    function mostrarParticipante(
+      nome,
+      id
+    ) {
+
+      nomeParticipante.textContent =
+        nome || "-";
+
+      idParticipante.textContent =
+        id || "-";
+
+      participante.style.display =
+        "block";
+
+    }
+
+
+    function esconderParticipante() {
+
+      participante.style.display =
+        "none";
+
+      nomeParticipante.textContent =
+        "";
+
+      idParticipante.textContent =
+        "";
+
+    }
 
 
     function leituraRealizada(token) {
 
-  resultado.textContent =
-    "Consultando participante...";
+      if (processando) {
+        return;
+      }
 
-  fetch("https://script.google.com/macros/s/AKfycbweKHfR198LnCnQ_JIZjuibYKk-91e7ypIjtRRimvinjL9S7H8D_5mrnFXxSEsiP4IaDQ/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify({
-      token: token
-    })
-  })
+      processando = true;
 
-  .then(function(resposta) {
-    return resposta.json();
-  })
+      atualizarStatus(
+        "QR Code identificado. Verificando...",
+        "aviso"
+      );
 
-  .then(function(dados) {
+      esconderParticipante();
 
-    if (dados.sucesso) {
 
-      resultado.textContent =
-        "✅ " + dados.mensagem +
-        "\n\nParticipante: " +
-        dados.participante.nome;
+      fetch(
+        URL_APPS_SCRIPT,
+        {
+          method: "POST",
 
-    } else {
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
 
-      resultado.textContent =
-        "⚠️ " + dados.mensagem;
+          body: JSON.stringify({
+
+            token: token,
+
+            dia: diaSelecionado,
+
+            tipo: tipoSelecionado
+
+          })
+
+        }
+      )
+
+      .then(function(resposta) {
+
+        if (!resposta.ok) {
+          throw new Error(
+            "HTTP " + resposta.status
+          );
+        }
+
+        return resposta.json();
+
+      })
+
+      .then(function(dados) {
+
+        if (dados.sucesso) {
+
+          mostrarParticipante(
+            dados.participante.nome,
+            dados.participante.id
+          );
+
+          atualizarStatus(
+            "✅ " + dados.mensagem,
+            "sucesso"
+          );
+
+        } else {
+
+          atualizarStatus(
+            "⚠️ " + dados.mensagem,
+            "erro"
+          );
+
+        }
+
+      })
+
+      .catch(function(erro) {
+
+        console.error(erro);
+
+        atualizarStatus(
+          "❌ Não foi possível comunicar com o sistema de credenciamento.",
+          "erro"
+        );
+
+      })
+
+      .finally(function() {
+
+        processando = false;
+
+      });
 
     }
 
-  })
 
-  .catch(function(erro) {
+    function credenciarManual() {
 
-    console.error(erro);
+      const token =
+        tokenManual.value.trim();
 
-    resultado.textContent =
-      "❌ Não foi possível comunicar com o sistema de credenciamento.";
+      if (!token) {
 
-  });
+        atualizarStatus(
+          "Digite um token para realizar o credenciamento.",
+          "aviso"
+        );
 
-}
+        tokenManual.focus();
+
+        return;
+
+      }
+
+      leituraRealizada(token);
+
+      tokenManual.value = "";
+
+    }
+
+
+    tokenManual.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Enter") {
+
+          credenciarManual();
+
+        }
+
+      }
+    );
 
 
     function erroDeLeitura() {
 
-      // Ignora erros momentâneos enquanto
-      // o scanner procura um QR Code.
+      // Erros momentâneos de leitura
+      // são ignorados enquanto o scanner procura o QR Code.
 
     }
 
@@ -219,19 +769,26 @@
       {
         fps: 15,
 
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
+        qrbox:
+          function(
+            viewfinderWidth,
+            viewfinderHeight
+          ) {
 
-          const tamanho =
-            Math.floor(
-              Math.min(viewfinderWidth, viewfinderHeight) * 0.75
-            );
+            const tamanho =
+              Math.floor(
+                Math.min(
+                  viewfinderWidth,
+                  viewfinderHeight
+                ) * 0.75
+              );
 
-          return {
-            width: tamanho,
-            height: tamanho
-          };
+            return {
+              width: tamanho,
+              height: tamanho
+            };
 
-        },
+          },
 
         aspectRatio: 1.0
 
@@ -243,12 +800,22 @@
 
     )
 
+    .then(function() {
+
+      atualizarStatus(
+        "Dia 1 - Entrada aguardando leitura."
+      );
+
+    })
+
     .catch(function(erro) {
 
       console.error(erro);
 
-      resultado.textContent =
-        "Não foi possível acessar a câmera.";
+      atualizarStatus(
+        "Não foi possível acessar a câmera. Use o credenciamento manual.",
+        "erro"
+      );
 
     });
 
