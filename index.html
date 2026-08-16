@@ -44,8 +44,7 @@
 
       border-radius: 18px;
 
-      box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
 
     .cabecalho {
@@ -55,17 +54,13 @@
 
     h1 {
       margin: 0;
-
       font-size: 26px;
-
       color: #1f2937;
     }
 
     .subtitulo {
       margin-top: 8px;
-
       color: #6b7280;
-
       font-size: 15px;
     }
 
@@ -75,11 +70,8 @@
 
     .grupo-titulo {
       margin-bottom: 8px;
-
       font-size: 15px;
-
       font-weight: bold;
-
       color: #374151;
     }
 
@@ -90,19 +82,15 @@
 
     .opcao {
       flex: 1;
-
       padding: 13px 10px;
 
       border: 1px solid #d1d5db;
-
       border-radius: 9px;
 
       background: white;
-
       color: #374151;
 
       font-weight: bold;
-
       cursor: pointer;
 
       transition: 0.2s;
@@ -114,9 +102,7 @@
 
     .opcao.ativo {
       background: #1f2937;
-
       color: white;
-
       border-color: #1f2937;
     }
 
@@ -132,17 +118,13 @@
       min-height: 280px;
 
       display: flex;
-
       justify-content: center;
-
       align-items: center;
     }
 
     #reader video {
       width: 100% !important;
-
       height: auto !important;
-
       border-radius: 14px;
     }
 
@@ -170,19 +152,16 @@
 
     #resultado.sucesso {
       background: #dcfce7;
-
       color: #166534;
     }
 
     #resultado.erro {
       background: #fee2e2;
-
       color: #991b1b;
     }
 
     #resultado.aviso {
       background: #fef3c7;
-
       color: #92400e;
     }
 
@@ -232,13 +211,11 @@
 
     .manual-linha {
       display: flex;
-
       gap: 8px;
     }
 
     .manual input {
       flex: 1;
-
       min-width: 0;
 
       padding: 12px;
@@ -346,6 +323,8 @@
     </header>
 
 
+    <!-- DIA DO EVENTO -->
+
     <section class="grupo">
 
       <div class="grupo-titulo">
@@ -376,6 +355,8 @@
 
     </section>
 
+
+    <!-- TIPO DE REGISTRO -->
 
     <section class="grupo">
 
@@ -408,13 +389,19 @@
     </section>
 
 
+    <!-- CÂMERA -->
+
     <div id="reader"></div>
 
 
+    <!-- RESULTADO -->
+
     <div id="resultado">
-      Aguardando leitura do QR Code...
+      Dia 1 - Entrada aguardando leitura.
     </div>
 
+
+    <!-- PARTICIPANTE -->
 
     <section
       id="participante"
@@ -433,6 +420,8 @@
 
     </section>
 
+
+    <!-- CREDENCIAMENTO MANUAL -->
 
     <section class="manual">
 
@@ -479,9 +468,17 @@
 
   <script>
 
+    /*
+     * URL DA IMPLANTAÇÃO DO APPS SCRIPT
+     */
+
     const URL_APPS_SCRIPT =
       "https://script.google.com/macros/s/AKfycbweKHfR198LnCnQ_JIZjuibYKk-91e7ypIjtRRimvinjL9S7H8D_5mrnFXxSEsiP4IaDQ/exec";
 
+
+    /*
+     * CONTROLES DO SISTEMA
+     */
 
     let diaSelecionado = "Dia 1";
 
@@ -489,8 +486,14 @@
 
     let processando = false;
 
-    let cameraIniciada = false;
+    let ultimoToken = "";
 
+    let ultimoMomento = 0;
+
+
+    /*
+     * ELEMENTOS DA TELA
+     */
 
     const resultado =
       document.getElementById("resultado");
@@ -508,6 +511,10 @@
       document.getElementById("tokenManual");
 
 
+    /*
+     * SELECIONAR DIA
+     */
+
     function selecionarDia(dia) {
 
       diaSelecionado = dia;
@@ -523,13 +530,17 @@
         .toggle("ativo", dia === "Dia 2");
 
       atualizarStatus(
-        dia + " selecionado. " +
+        dia + " - " +
         tipoSelecionado +
         " aguardando leitura."
       );
 
     }
 
+
+    /*
+     * SELECIONAR ENTRADA OU SAÍDA
+     */
 
     function selecionarTipo(tipo) {
 
@@ -554,6 +565,10 @@
     }
 
 
+    /*
+     * ATUALIZAR MENSAGEM
+     */
+
     function atualizarStatus(
       mensagem,
       tipo = ""
@@ -563,14 +578,16 @@
 
       resultado.className = "";
 
-      resultado.id = "resultado";
-
       if (tipo) {
         resultado.classList.add(tipo);
       }
 
     }
 
+
+    /*
+     * MOSTRAR PARTICIPANTE
+     */
 
     function mostrarParticipante(
       nome,
@@ -589,6 +606,10 @@
     }
 
 
+    /*
+     * ESCONDER PARTICIPANTE
+     */
+
     function esconderParticipante() {
 
       participante.style.display =
@@ -603,105 +624,46 @@
     }
 
 
-    function pararCamera() {
-
-      if (!cameraIniciada) {
-        return Promise.resolve();
-      }
-
-      return scanner
-        .stop()
-        .then(function() {
-
-          cameraIniciada = false;
-
-        })
-        .catch(function(erro) {
-
-          console.warn(
-            "Não foi possível parar a câmera:",
-            erro
-          );
-
-          cameraIniciada = false;
-
-        });
-
-    }
-
-
-    function iniciarCamera() {
-
-      if (cameraIniciada) {
-        return Promise.resolve();
-      }
-
-      return scanner
-        .start(
-
-          {
-            facingMode: "environment"
-          },
-
-          {
-            fps: 15,
-
-            qrbox:
-              function(
-                viewfinderWidth,
-                viewfinderHeight
-              ) {
-
-                const tamanho =
-                  Math.floor(
-                    Math.min(
-                      viewfinderWidth,
-                      viewfinderHeight
-                    ) * 0.75
-                  );
-
-                return {
-                  width: tamanho,
-                  height: tamanho
-                };
-
-              },
-
-            aspectRatio: 1.0
-
-          },
-
-          leituraRealizada,
-
-          erroDeLeitura
-
-        )
-        .then(function() {
-
-          cameraIniciada = true;
-
-          atualizarStatus(
-            diaSelecionado +
-            " - " +
-            tipoSelecionado +
-            " aguardando leitura."
-          );
-
-        });
-
-    }
-
+    /*
+     * PROCESSAR QR CODE
+     */
 
     function leituraRealizada(token) {
+
+      /*
+       * Se já existe uma leitura sendo processada,
+       * não inicia outra.
+       */
 
       if (processando) {
         return;
       }
 
+
+      /*
+       * Evita que o mesmo QR seja enviado
+       * repetidamente em poucos segundos.
+       */
+
+      const agora = Date.now();
+
+      if (
+        token === ultimoToken &&
+        agora - ultimoMomento < 2500
+      ) {
+        return;
+      }
+
+
+      ultimoToken = token;
+
+      ultimoMomento = agora;
+
       processando = true;
 
+
       atualizarStatus(
-        "QR Code identificado. Processando...",
+        "QR Code identificado. Verificando...",
         "aviso"
       );
 
@@ -709,165 +671,14 @@
 
 
       /*
-       * Assim que o QR é identificado,
-       * paramos a câmera.
+       * IMPORTANTE:
        *
-       * O token já foi capturado.
-       * Portanto, a pessoa pode retirar
-       * o celular sem interromper o processamento.
+       * O token já foi capturado neste momento.
+       *
+       * A pessoa pode retirar o celular da frente
+       * da câmera enquanto o sistema consulta
+       * o Apps Script.
        */
-
-      pararCamera()
-        .then(function() {
-
-          return fetch(
-            URL_APPS_SCRIPT,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "text/plain;charset=utf-8"
-              },
-
-              body: JSON.stringify({
-
-                token: token,
-
-                dia: diaSelecionado,
-
-                tipo: tipoSelecionado
-
-              })
-
-            }
-          );
-
-        })
-
-        .then(function(resposta) {
-
-          if (!resposta.ok) {
-
-            throw new Error(
-              "HTTP " + resposta.status
-            );
-
-          }
-
-          return resposta.json();
-
-        })
-
-        .then(function(dados) {
-
-          if (dados.sucesso) {
-
-            mostrarParticipante(
-              dados.participante.nome,
-              dados.participante.id
-            );
-
-            atualizarStatus(
-              "✅ " + dados.mensagem,
-              "sucesso"
-            );
-
-          } else {
-
-            if (dados.participante) {
-
-              mostrarParticipante(
-                dados.participante.nome,
-                dados.participante.id
-              );
-
-            }
-
-            atualizarStatus(
-              "⚠️ " + dados.mensagem,
-              "erro"
-            );
-
-          }
-
-        })
-
-        .catch(function(erro) {
-
-          console.error(erro);
-
-          atualizarStatus(
-            "❌ Não foi possível comunicar com o sistema de credenciamento.",
-            "erro"
-          );
-
-        })
-
-        .finally(function() {
-
-          processando = false;
-
-          /*
-           * Pequena pausa para que o resultado
-           * fique visível antes de liberar
-           * a câmera novamente.
-           */
-
-          setTimeout(function() {
-
-            iniciarCamera()
-              .catch(function(erro) {
-
-                console.error(
-                  "Erro ao reiniciar câmera:",
-                  erro
-                );
-
-                atualizarStatus(
-                  "A câmera precisa ser reiniciada.",
-                  "erro"
-                );
-
-              });
-
-          }, 800);
-
-        });
-
-    }
-
-
-    function credenciarManual() {
-
-      const token =
-        tokenManual.value.trim();
-
-      if (!token) {
-
-        atualizarStatus(
-          "Digite um token para realizar o credenciamento.",
-          "aviso"
-        );
-
-        tokenManual.focus();
-
-        return;
-
-      }
-
-      if (processando) {
-        return;
-      }
-
-      processando = true;
-
-      tokenManual.value = "";
-
-      atualizarStatus(
-        "Token informado. Processando...",
-        "aviso"
-      );
 
       fetch(
         URL_APPS_SCRIPT,
@@ -922,6 +733,21 @@
 
         } else {
 
+          /*
+           * Se já estiver registrado,
+           * ainda mostramos o participante
+           * quando essa informação existir.
+           */
+
+          if (dados.participante) {
+
+            mostrarParticipante(
+              dados.participante.nome,
+              dados.participante.id
+            );
+
+          }
+
           atualizarStatus(
             "⚠️ " + dados.mensagem,
             "erro"
@@ -933,7 +759,10 @@
 
       .catch(function(erro) {
 
-        console.error(erro);
+        console.error(
+          "Erro ao comunicar com Apps Script:",
+          erro
+        );
 
         atualizarStatus(
           "❌ Não foi possível comunicar com o sistema de credenciamento.",
@@ -944,12 +773,56 @@
 
       .finally(function() {
 
+        /*
+         * Libera uma nova leitura.
+         */
+
         processando = false;
 
       });
 
     }
 
+
+    /*
+     * CREDENCIAMENTO MANUAL
+     */
+
+    function credenciarManual() {
+
+      const token =
+        tokenManual.value.trim();
+
+
+      if (!token) {
+
+        atualizarStatus(
+          "Digite um token para realizar o credenciamento.",
+          "aviso"
+        );
+
+        tokenManual.focus();
+
+        return;
+
+      }
+
+
+      if (processando) {
+        return;
+      }
+
+
+      leituraRealizada(token);
+
+      tokenManual.value = "";
+
+    }
+
+
+    /*
+     * ENTER NO CAMPO MANUAL
+     */
 
     tokenManual.addEventListener(
       "keydown",
@@ -965,29 +838,69 @@
     );
 
 
-    function erroDeLeitura() {
+    /*
+     * ERROS MOMENTÂNEOS DE LEITURA
+     *
+     * São ignorados porque a câmera fica
+     * procurando continuamente.
+     */
 
-      // Erros momentâneos de leitura
-      // são ignorados enquanto o scanner procura o QR Code.
+    function erroDeLeitura() {
 
     }
 
+
+    /*
+     * INICIAR LEITOR
+     */
 
     const scanner =
       new Html5Qrcode("reader");
 
 
-    iniciarCamera()
-      .catch(function(erro) {
+    scanner.start(
 
-        console.error(erro);
+      {
+        facingMode: "environment"
+      },
 
-        atualizarStatus(
-          "Não foi possível acessar a câmera. Use o credenciamento manual.",
-          "erro"
-        );
+      {
+        fps: 10,
 
-      });
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+
+      },
+
+      leituraRealizada,
+
+      erroDeLeitura
+
+    )
+
+    .then(function() {
+
+      atualizarStatus(
+        "Dia 1 - Entrada aguardando leitura."
+      );
+
+    })
+
+    .catch(function(erro) {
+
+      console.error(
+        "Erro ao iniciar câmera:",
+        erro
+      );
+
+      atualizarStatus(
+        "Não foi possível acessar a câmera. Use o credenciamento manual.",
+        "erro"
+      );
+
+    });
 
   </script>
 
