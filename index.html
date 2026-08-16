@@ -4,10 +4,7 @@
 <head>
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Bottom Up 7.0 - Credenciamento</title>
 
@@ -54,13 +51,17 @@
 
     h1 {
       margin: 0;
+
       font-size: 26px;
+
       color: #1f2937;
     }
 
     .subtitulo {
       margin-top: 8px;
+
       color: #6b7280;
+
       font-size: 15px;
     }
 
@@ -70,8 +71,11 @@
 
     .grupo-titulo {
       margin-bottom: 8px;
+
       font-size: 15px;
+
       font-weight: bold;
+
       color: #374151;
     }
 
@@ -82,15 +86,19 @@
 
     .opcao {
       flex: 1;
+
       padding: 13px 10px;
 
       border: 1px solid #d1d5db;
+
       border-radius: 9px;
 
       background: white;
+
       color: #374151;
 
       font-weight: bold;
+
       cursor: pointer;
 
       transition: 0.2s;
@@ -102,7 +110,9 @@
 
     .opcao.ativo {
       background: #1f2937;
+
       color: white;
+
       border-color: #1f2937;
     }
 
@@ -118,13 +128,17 @@
       min-height: 280px;
 
       display: flex;
+
       justify-content: center;
+
       align-items: center;
     }
 
     #reader video {
       width: 100% !important;
+
       height: auto !important;
+
       border-radius: 14px;
     }
 
@@ -152,16 +166,19 @@
 
     #resultado.sucesso {
       background: #dcfce7;
+
       color: #166534;
     }
 
     #resultado.erro {
       background: #fee2e2;
+
       color: #991b1b;
     }
 
     #resultado.aviso {
       background: #fef3c7;
+
       color: #92400e;
     }
 
@@ -211,11 +228,13 @@
 
     .manual-linha {
       display: flex;
+
       gap: 8px;
     }
 
     .manual input {
       flex: 1;
+
       min-width: 0;
 
       padding: 12px;
@@ -403,10 +422,7 @@
 
     <!-- PARTICIPANTE -->
 
-    <section
-      id="participante"
-      class="participante"
-    >
+    <section id="participante" class="participante">
 
       <p>
         <strong>Nome:</strong>
@@ -468,17 +484,9 @@
 
   <script>
 
-    /*
-     * URL DA IMPLANTAÇÃO DO APPS SCRIPT
-     */
-
     const URL_APPS_SCRIPT =
       "https://script.google.com/macros/s/AKfycbweKHfR198LnCnQ_JIZjuibYKk-91e7ypIjtRRimvinjL9S7H8D_5mrnFXxSEsiP4IaDQ/exec";
 
-
-    /*
-     * CONTROLES DO SISTEMA
-     */
 
     let diaSelecionado = "Dia 1";
 
@@ -490,10 +498,6 @@
 
     let ultimoMomento = 0;
 
-
-    /*
-     * ELEMENTOS DA TELA
-     */
 
     const resultado =
       document.getElementById("resultado");
@@ -510,10 +514,6 @@
     const tokenManual =
       document.getElementById("tokenManual");
 
-
-    /*
-     * SELECIONAR DIA
-     */
 
     function selecionarDia(dia) {
 
@@ -538,10 +538,6 @@
     }
 
 
-    /*
-     * SELECIONAR ENTRADA OU SAÍDA
-     */
-
     function selecionarTipo(tipo) {
 
       tipoSelecionado = tipo;
@@ -565,10 +561,6 @@
     }
 
 
-    /*
-     * ATUALIZAR MENSAGEM
-     */
-
     function atualizarStatus(
       mensagem,
       tipo = ""
@@ -585,14 +577,7 @@
     }
 
 
-    /*
-     * MOSTRAR PARTICIPANTE
-     */
-
-    function mostrarParticipante(
-      nome,
-      id
-    ) {
+    function mostrarParticipante(nome, id) {
 
       nomeParticipante.textContent =
         nome || "-";
@@ -605,10 +590,6 @@
 
     }
 
-
-    /*
-     * ESCONDER PARTICIPANTE
-     */
 
     function esconderParticipante() {
 
@@ -624,42 +605,30 @@
     }
 
 
-    /*
-     * PROCESSAR QR CODE
-     */
-
     function leituraRealizada(token) {
-
-      /*
-       * Se já existe uma leitura sendo processada,
-       * não inicia outra.
-       */
-
-      if (processando) {
-        return;
-      }
-
-
-      /*
-       * Evita que o mesmo QR seja enviado
-       * repetidamente em poucos segundos.
-       */
 
       const agora = Date.now();
 
+      /*
+       * Evita que o mesmo QR seja enviado várias vezes
+       * enquanto ainda estamos processando a leitura.
+       */
+
       if (
-        token === ultimoToken &&
-        agora - ultimoMomento < 2500
+        processando ||
+        (
+          token === ultimoToken &&
+          agora - ultimoMomento < 2500
+        )
       ) {
         return;
       }
 
+      processando = true;
 
       ultimoToken = token;
 
       ultimoMomento = agora;
-
-      processando = true;
 
 
       atualizarStatus(
@@ -672,12 +641,11 @@
 
       /*
        * IMPORTANTE:
+       * A câmera NÃO é parada aqui.
        *
-       * O token já foi capturado neste momento.
-       *
-       * A pessoa pode retirar o celular da frente
-       * da câmera enquanto o sistema consulta
-       * o Apps Script.
+       * O QR já foi capturado pelo scanner.
+       * Mesmo que a pessoa retire o celular,
+       * o processamento continua normalmente.
        */
 
       fetch(
@@ -733,13 +701,9 @@
 
         } else {
 
-          /*
-           * Se já estiver registrado,
-           * ainda mostramos o participante
-           * quando essa informação existir.
-           */
-
-          if (dados.participante) {
+          if (
+            dados.participante
+          ) {
 
             mostrarParticipante(
               dados.participante.nome,
@@ -760,7 +724,7 @@
       .catch(function(erro) {
 
         console.error(
-          "Erro ao comunicar com Apps Script:",
+          "Erro na comunicação:",
           erro
         );
 
@@ -774,7 +738,7 @@
       .finally(function() {
 
         /*
-         * Libera uma nova leitura.
+         * Libera o scanner para o próximo QR.
          */
 
         processando = false;
@@ -784,15 +748,10 @@
     }
 
 
-    /*
-     * CREDENCIAMENTO MANUAL
-     */
-
     function credenciarManual() {
 
       const token =
         tokenManual.value.trim();
-
 
       if (!token) {
 
@@ -807,22 +766,12 @@
 
       }
 
-
-      if (processando) {
-        return;
-      }
-
-
       leituraRealizada(token);
 
       tokenManual.value = "";
 
     }
 
-
-    /*
-     * ENTER NO CAMPO MANUAL
-     */
 
     tokenManual.addEventListener(
       "keydown",
@@ -838,25 +787,26 @@
     );
 
 
-    /*
-     * ERROS MOMENTÂNEOS DE LEITURA
-     *
-     * São ignorados porque a câmera fica
-     * procurando continuamente.
-     */
-
     function erroDeLeitura() {
+
+      /*
+       * Os erros momentâneos são ignorados.
+       *
+       * O html5-qrcode continua procurando
+       * o QR Code normalmente.
+       */
 
     }
 
 
-    /*
-     * INICIAR LEITOR
-     */
-
     const scanner =
       new Html5Qrcode("reader");
 
+
+    /*
+     * NÃO vamos alterar o comportamento
+     * básico que estava funcionando.
+     */
 
     scanner.start(
 
@@ -865,12 +815,29 @@
       },
 
       {
-        fps: 10,
+        fps: 15,
 
-        qrbox: {
-          width: 250,
-          height: 250
-        }
+        qrbox: function(
+          viewfinderWidth,
+          viewfinderHeight
+        ) {
+
+          const tamanho =
+            Math.floor(
+              Math.min(
+                viewfinderWidth,
+                viewfinderHeight
+              ) * 0.75
+            );
+
+          return {
+            width: tamanho,
+            height: tamanho
+          };
+
+        },
+
+        aspectRatio: 1.0
 
       },
 
@@ -891,7 +858,7 @@
     .catch(function(erro) {
 
       console.error(
-        "Erro ao iniciar câmera:",
+        "Erro ao acessar câmera:",
         erro
       );
 
