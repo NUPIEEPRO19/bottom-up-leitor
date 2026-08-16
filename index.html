@@ -346,8 +346,6 @@
     </header>
 
 
-    <!-- DIA DO EVENTO -->
-
     <section class="grupo">
 
       <div class="grupo-titulo">
@@ -378,8 +376,6 @@
 
     </section>
 
-
-    <!-- TIPO DE REGISTRO -->
 
     <section class="grupo">
 
@@ -412,19 +408,13 @@
     </section>
 
 
-    <!-- CÂMERA -->
-
     <div id="reader"></div>
 
-
-    <!-- RESULTADO -->
 
     <div id="resultado">
       Aguardando leitura do QR Code...
     </div>
 
-
-    <!-- PARTICIPANTE -->
 
     <section
       id="participante"
@@ -443,8 +433,6 @@
 
     </section>
 
-
-    <!-- CREDENCIAMENTO MANUAL -->
 
     <section class="manual">
 
@@ -500,6 +488,8 @@
     let tipoSelecionado = "Entrada";
 
     let processando = false;
+
+    let cameraIniciada = false;
 
 
     const resultado =
@@ -613,6 +603,95 @@
     }
 
 
+    function pararCamera() {
+
+      if (!cameraIniciada) {
+        return Promise.resolve();
+      }
+
+      return scanner
+        .stop()
+        .then(function() {
+
+          cameraIniciada = false;
+
+        })
+        .catch(function(erro) {
+
+          console.warn(
+            "Não foi possível parar a câmera:",
+            erro
+          );
+
+          cameraIniciada = false;
+
+        });
+
+    }
+
+
+    function iniciarCamera() {
+
+      if (cameraIniciada) {
+        return Promise.resolve();
+      }
+
+      return scanner
+        .start(
+
+          {
+            facingMode: "environment"
+          },
+
+          {
+            fps: 15,
+
+            qrbox:
+              function(
+                viewfinderWidth,
+                viewfinderHeight
+              ) {
+
+                const tamanho =
+                  Math.floor(
+                    Math.min(
+                      viewfinderWidth,
+                      viewfinderHeight
+                    ) * 0.75
+                  );
+
+                return {
+                  width: tamanho,
+                  height: tamanho
+                };
+
+              },
+
+            aspectRatio: 1.0
+
+          },
+
+          leituraRealizada,
+
+          erroDeLeitura
+
+        )
+        .then(function() {
+
+          cameraIniciada = true;
+
+          atualizarStatus(
+            diaSelecionado +
+            " - " +
+            tipoSelecionado +
+            " aguardando leitura."
+          );
+
+        });
+
+    }
+
+
     function leituraRealizada(token) {
 
       if (processando) {
@@ -622,12 +701,173 @@
       processando = true;
 
       atualizarStatus(
-        "QR Code identificado. Verificando...",
+        "QR Code identificado. Processando...",
         "aviso"
       );
 
       esconderParticipante();
 
+
+      /*
+       * Assim que o QR é identificado,
+       * paramos a câmera.
+       *
+       * O token já foi capturado.
+       * Portanto, a pessoa pode retirar
+       * o celular sem interromper o processamento.
+       */
+
+      pararCamera()
+        .then(function() {
+
+          return fetch(
+            URL_APPS_SCRIPT,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "text/plain;charset=utf-8"
+              },
+
+              body: JSON.stringify({
+
+                token: token,
+
+                dia: diaSelecionado,
+
+                tipo: tipoSelecionado
+
+              })
+
+            }
+          );
+
+        })
+
+        .then(function(resposta) {
+
+          if (!resposta.ok) {
+
+            throw new Error(
+              "HTTP " + resposta.status
+            );
+
+          }
+
+          return resposta.json();
+
+        })
+
+        .then(function(dados) {
+
+          if (dados.sucesso) {
+
+            mostrarParticipante(
+              dados.participante.nome,
+              dados.participante.id
+            );
+
+            atualizarStatus(
+              "✅ " + dados.mensagem,
+              "sucesso"
+            );
+
+          } else {
+
+            if (dados.participante) {
+
+              mostrarParticipante(
+                dados.participante.nome,
+                dados.participante.id
+              );
+
+            }
+
+            atualizarStatus(
+              "⚠️ " + dados.mensagem,
+              "erro"
+            );
+
+          }
+
+        })
+
+        .catch(function(erro) {
+
+          console.error(erro);
+
+          atualizarStatus(
+            "❌ Não foi possível comunicar com o sistema de credenciamento.",
+            "erro"
+          );
+
+        })
+
+        .finally(function() {
+
+          processando = false;
+
+          /*
+           * Pequena pausa para que o resultado
+           * fique visível antes de liberar
+           * a câmera novamente.
+           */
+
+          setTimeout(function() {
+
+            iniciarCamera()
+              .catch(function(erro) {
+
+                console.error(
+                  "Erro ao reiniciar câmera:",
+                  erro
+                );
+
+                atualizarStatus(
+                  "A câmera precisa ser reiniciada.",
+                  "erro"
+                );
+
+              });
+
+          }, 800);
+
+        });
+
+    }
+
+
+    function credenciarManual() {
+
+      const token =
+        tokenManual.value.trim();
+
+      if (!token) {
+
+        atualizarStatus(
+          "Digite um token para realizar o credenciamento.",
+          "aviso"
+        );
+
+        tokenManual.focus();
+
+        return;
+
+      }
+
+      if (processando) {
+        return;
+      }
+
+      processando = true;
+
+      tokenManual.value = "";
+
+      atualizarStatus(
+        "Token informado. Processando...",
+        "aviso"
+      );
 
       fetch(
         URL_APPS_SCRIPT,
@@ -655,9 +895,11 @@
       .then(function(resposta) {
 
         if (!resposta.ok) {
+
           throw new Error(
             "HTTP " + resposta.status
           );
+
         }
 
         return resposta.json();
@@ -709,31 +951,6 @@
     }
 
 
-    function credenciarManual() {
-
-      const token =
-        tokenManual.value.trim();
-
-      if (!token) {
-
-        atualizarStatus(
-          "Digite um token para realizar o credenciamento.",
-          "aviso"
-        );
-
-        tokenManual.focus();
-
-        return;
-
-      }
-
-      leituraRealizada(token);
-
-      tokenManual.value = "";
-
-    }
-
-
     tokenManual.addEventListener(
       "keydown",
       function(event) {
@@ -760,64 +977,17 @@
       new Html5Qrcode("reader");
 
 
-    scanner.start(
+    iniciarCamera()
+      .catch(function(erro) {
 
-      {
-        facingMode: "environment"
-      },
+        console.error(erro);
 
-      {
-        fps: 15,
+        atualizarStatus(
+          "Não foi possível acessar a câmera. Use o credenciamento manual.",
+          "erro"
+        );
 
-        qrbox:
-          function(
-            viewfinderWidth,
-            viewfinderHeight
-          ) {
-
-            const tamanho =
-              Math.floor(
-                Math.min(
-                  viewfinderWidth,
-                  viewfinderHeight
-                ) * 0.75
-              );
-
-            return {
-              width: tamanho,
-              height: tamanho
-            };
-
-          },
-
-        aspectRatio: 1.0
-
-      },
-
-      leituraRealizada,
-
-      erroDeLeitura
-
-    )
-
-    .then(function() {
-
-      atualizarStatus(
-        "Dia 1 - Entrada aguardando leitura."
-      );
-
-    })
-
-    .catch(function(erro) {
-
-      console.error(erro);
-
-      atualizarStatus(
-        "Não foi possível acessar a câmera. Use o credenciamento manual.",
-        "erro"
-      );
-
-    });
+      });
 
   </script>
 
